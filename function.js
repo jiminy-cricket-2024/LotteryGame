@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chests = document.querySelectorAll('.treasure-chest');
+    const chestsContainer = document.querySelector('.chests-container');
     const tryAgainButton = document.getElementById('try-again');
     const winningsElement = document.getElementById('winnings');
     const tempValues = Array.from(document.querySelectorAll('.temp-value'));
+    const message = document.getElementById('message');
 
     let winnerIndex;
     let winnings = 0;
@@ -15,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGame() {
         tryAgainButton.style.display = 'none';
-        chests.forEach(chest => {
+        chestsContainer.querySelectorAll('.treasure-chest').forEach(chest => {
             chest.classList.remove('open', 'disabled');
             chest.style.pointerEvents = 'auto';
         });
 
-        winnerIndex = Math.floor(Math.random() * chests.length);
+        winnerIndex = Math.floor(Math.random() * chestsContainer.querySelectorAll('.treasure-chest').length);
     }
 
     function flashWinnings() {
@@ -40,29 +41,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetGame();
 
-    chests.forEach((chest, index) => {
-        chest.addEventListener('click', () => {
-            if (!chest.classList.contains('disabled')) {
-                const randomAmount = getRandomAmount();
-                const tempValueElement = tempValues[index];
-                showTempValue(tempValueElement, randomAmount);
+    // Event delegation
+    chestsContainer.addEventListener('click', (event) => {
+        const chest = event.target.closest('.treasure-chest');
+        if (chest && !chest.classList.contains('disabled')) {
+            const index = Array.from(chestsContainer.querySelectorAll('.treasure-chest')).indexOf(chest);
+            const randomAmount = getRandomAmount();
+            const tempValueElement = tempValues[index];
+            showTempValue(tempValueElement, randomAmount);
 
-                setTimeout(() => {
-                    if (index === winnerIndex) {
-                        chest.classList.add('open');
-                        winnings += randomAmount;
-                    } else {
-                        chest.classList.add('open');
-                        winnings -= randomAmount;
-                    }
+            setTimeout(() => {
+                if (index === winnerIndex) {
+                    chest.classList.add('open');
+                    winnings += randomAmount;
+                    message.textContent = 'Congratulations! You found the treasure!';
+                } else {
+                    chest.classList.add('open');
+                    winnings -= randomAmount;
+                    message.textContent = 'Sorry, you failed. Try again!';
+                }
 
-                    winningsElement.textContent = `$${winnings.toFixed(2)}`;
-                    flashWinnings();
-                    chests.forEach(c => c.classList.add('disabled'));
-                    tryAgainButton.style.display = 'block';
-                }, 1000);
-            }
-        });
+                winningsElement.textContent = `$${winnings.toFixed(2)}`;
+                flashWinnings();
+                chestsContainer.querySelectorAll('.treasure-chest').forEach(c => c.classList.add('disabled'));
+                tryAgainButton.style.display = 'block';
+            }, 1000);
+        }
     });
+
     tryAgainButton.addEventListener('click', resetGame);
 });
