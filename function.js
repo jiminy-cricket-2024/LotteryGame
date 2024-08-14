@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         winnings += randomAmount;
                     } else {
                         chest.classList.add('open');
-                        winnings += randomAmount;
+                        winnings -= randomAmount;
                     }
 
                     winningsElement.textContent = `$${winnings.toFixed(2)}`;
